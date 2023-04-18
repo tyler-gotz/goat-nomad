@@ -2,33 +2,49 @@ import 'reflect-metadata'
 import express from 'express'
 import cors from 'cors'
 import morgan from 'morgan'
-import { createSchema, createYoga } from 'graphql-yoga'
-import * as dotenv from 'dotenv'
+import http from 'http'
+import { ApolloServer } from '@apollo/server'
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer'
+import { expressMiddleware } from '@apollo/server/express4'
+import bodyParser from 'body-parser'
 
-const app = express()
-dotenv.config()
+// The GraphQL schema
+const typeDefs = `#graphql
+  type Query {
+    hello: String
+  }
+`;
 
-app.use(cors())
-app.use(morgan("combined"))
+// A map of functions which return data for the schema.
+const resolvers = {
+  Query: {
+    hello: () => 'world',
+  },
+};
 
-const yoga = createYoga({
-    schema: createSchema({
-        typeDefs: /* GraphQL */ `
-        type Query {
-          hello: String
-        }
-      `,
-      resolvers: {
-        Query: {
-          hello: () => 'world'
-        }
-      }
-    })
-})
+async function main() {
+  const app = express()
+  const httpServer = http.createServer(app)
+  
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })]
+  })
 
-app.use('/graphql', yoga)
+  await server.start()
 
-const PORT = process.env.PORT || 5000
-app.listen(PORT, () => {
+  app.use(
+    cors(),
+    bodyParser.json(),
+    morgan("combined"),
+    expressMiddleware(server),
+  )
+
+  const PORT = process.env.PORT || 5000
+  app.listen(PORT, () => {
     console.info(`Server is running on PORT: ${PORT}`)
-})
+  })
+}
+
+main()
