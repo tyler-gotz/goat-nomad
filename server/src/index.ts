@@ -7,27 +7,15 @@ import { ApolloServer } from '@apollo/server'
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer'
 import { expressMiddleware } from '@apollo/server/express4'
 import bodyParser from 'body-parser'
-
-// The GraphQL schema
-const typeDefs = `#graphql
-  type Query {
-    hello: String
-  }
-`;
-
-// A map of functions which return data for the schema.
-const resolvers = {
-  Query: {
-    hello: () => 'world',
-  },
-};
+import { resolvers } from './resolvers/resolvers'
+import { schema } from './schema'
 
 async function main() {
   const app = express()
   const httpServer = http.createServer(app)
   
   const server = new ApolloServer({
-    typeDefs,
+    typeDefs: schema,
     resolvers,
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })]
   })
