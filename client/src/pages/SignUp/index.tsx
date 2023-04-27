@@ -5,12 +5,13 @@ import * as yup from 'yup'
 import YupPassword from 'yup-password'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { useSignUpMutation } from '../../generated/graphql'
 
 YupPassword(yup)
 
 const schema = yup.object({
-  firstname: yup.string().required('This field is required.'),
-  lastname: yup.string().required('This field is required.'),
+  firstName: yup.string().required('This field is required.'),
+  lastName: yup.string().required('This field is required.'),
   email: yup.string().email('Please enter valid email.').required('This field is required.'),
   username: yup.string().required('This field is required.'),
   password: yup.string().required('This field is required.')
@@ -32,8 +33,12 @@ const SignUp = () => {
     resolver: yupResolver(schema)
   })
 
-  const onSubmit = (data: FormData) => {
+  const [, signUp] = useSignUpMutation()
+
+  const onSubmit = async (data: FormData) => {
     console.log(data)
+    const response = await signUp(data)
+    console.log(response)
   }
 
   return (
@@ -48,11 +53,11 @@ const SignUp = () => {
             </label>
             <input 
               id='firstname'
-              {...register('firstname')}
+              {...register('firstName')}
               type='text'
-              className={`input ${errors.firstname ? 'input-error bg-white' : 'input-ghost'} w-full max-w-xl text-primary focus:bg-white focus:text-primary`}
+              className={`input ${errors.firstName ? 'input-error bg-white' : 'input-ghost'} w-full max-w-xl text-primary focus:bg-white focus:text-primary`}
             />
-            {errors.firstname && <p className='mt-1 text-error text-sm'>{errors.firstname.message}</p>}
+            {errors.firstName && <p className='mt-1 text-error text-sm'>{errors.firstName.message}</p>}
           </div>
           <div className='form-control w-full max-w-xl'>
             <label className='label' htmlFor='lastname'>
@@ -60,11 +65,11 @@ const SignUp = () => {
             </label>
             <input
               id='lastname'
-              {...register('lastname')}
+              {...register('lastName')}
               type='text'
-              className={`input ${errors.lastname ? 'input-error bg-white' : 'input-ghost'} w-full max-w-xl text-primary focus:bg-white focus:text-primary`}
+              className={`input ${errors.lastName ? 'input-error bg-white' : 'input-ghost'} w-full max-w-xl text-primary focus:bg-white focus:text-primary`}
             />
-            {errors.lastname && <p className='mt-1 text-error text-sm'>{errors.lastname.message}</p>}
+            {errors.lastName && <p className='mt-1 text-error text-sm'>{errors.lastName.message}</p>}
           </div>
         </div>
         <div className='form-control w-full max-w-xl'>
@@ -75,7 +80,7 @@ const SignUp = () => {
             id='email'
             type='text'
             {...register('email')}
-            className={`input ${errors.lastname ? 'input-error bg-white' : 'input-ghost'} w-full max-w-xl text-primary focus:bg-white focus:text-primary`}
+            className={`input ${errors.email ? 'input-error bg-white' : 'input-ghost'} w-full max-w-xl text-primary focus:bg-white focus:text-primary`}
           />
           {errors.email && <p className='mt-1 text-error text-sm'>{errors.email.message}</p>}
         </div>
@@ -88,6 +93,7 @@ const SignUp = () => {
             type='text'
             {...register('username')}
             className={`input ${errors.username ? 'input-error bg-white' : 'input-ghost'} w-full max-w-xl text-primary focus:bg-white focus:text-primary`}
+            autoComplete='username'
           />
           {errors.username && <p className='mt-1 text-error text-sm'>{errors.username.message}</p>}
         </div>
@@ -100,6 +106,7 @@ const SignUp = () => {
             {...register('password')}
             type='password'
             className={`input ${errors.password ? 'input-error bg-white' : 'input-ghost'} w-full max-w-xl text-primary focus:bg-white focus:text-primary`}
+            autoComplete='current-password'
           />
           {errors.password && <p className='mt-1 text-error text-sm'>{errors.password.message}</p>}
         </div>
